@@ -1,61 +1,133 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Simple calculators for general educational use."><title>Free calculators | Vitanora</title><link rel="stylesheet" href="style.css"></head><body>
-<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">V</span><span>Vitanora</span></a><button class="menu-toggle" aria-label="Open menu">☰</button><nav class="nav"><a href="index.html">Home</a><a href="health.html">Health</a><a href="heart.html">Heart</a><a href="fitness.html">Fitness</a><a href="nutrition.html">Nutrition</a><a href="tools.html">Tools</a><a href="articles.html">Articles</a><a href="about.html">About</a></nav></header>
-<main><section class="page-hero"><span class="eyebrow">HEALTH TOOLS</span><h1>Free calculators</h1><p>Simple calculators for general educational use.</p></section><section class="page-content"><div class="tool-grid"><div class="tool-box" id="bmi"><span class="eyebrow">BMI</span><h2>Body Mass Index</h2><label>Weight (kg)</label><input id="weight" type="number" step="0.1"><label>Height (cm)</label><input id="height" type="number" step="0.1"><button class="btn primary" style="margin-top:16px" id="bmiCalculate">Calculate</button><div class="result" id="bmiResult"></div></div>
-<div class="tool-box" id="bmr"><span class="eyebrow">BMR</span><h2>Basal metabolic rate</h2><label>Sex</label><select id="bmrSex"><option value="male">Male</option><option value="female">Female</option></select><label>Weight (kg)</label><input id="bmrWeight" type="number"><label>Height (cm)</label><input id="bmrHeight" type="number"><label>Age</label><input id="bmrAge" type="number"><button class="btn primary" style="margin-top:16px" id="bmrCalculate">Calculate</button><div class="result" id="bmrResult"></div></div>
-<div class="tool-box" id="calories"><span class="eyebrow">ENERGY</span><h2>Daily calorie estimate</h2><label>Estimated BMR (kcal/day)</label><input id="bmrForCal" type="number"><label>Activity factor</label><select id="activity"><option value="1.2">Sedentary · 1.2</option><option value="1.375">Lightly active · 1.375</option><option value="1.55">Moderately active · 1.55</option><option value="1.725">Very active · 1.725</option></select><button class="btn primary" style="margin-top:16px" id="calCalculate">Calculate</button><div class="result" id="calResult"></div></div>
-<div class="tool-box" id="heart-rate"><span class="eyebrow">FITNESS</span><h2>Target heart rate</h2><label>Age</label><input id="hrAge" type="number"><button class="btn primary" style="margin-top:16px" id="hrCalculate">Calculate</button><div class="result" id="hrResult"></div></div></div><div class="notice" style="margin-top:25px">These calculators provide general estimates. BMI has important limitations, calorie formulas are estimates, and heart-rate targets may not be appropriate for everyone—especially people with cardiovascular disease or those taking medicines that affect heart rate.</div></section></main>
-<footer><div><a class="brand" href="index.html"><span class="brand-mark">V</span><span>Vitanora</span></a><p>Evidence-based health. Better fitness. Healthier living.</p></div><div class="footer-links"><a href="health.html">Health</a><a href="fitness.html">Fitness</a><a href="nutrition.html">Nutrition</a><a href="tools.html">Tools</a><a href="about.html">About</a></div><div class="disclaimer"><strong>Medical disclaimer</strong><br>Vitanora provides general educational information and is not a substitute for individualized medical advice, diagnosis or treatment.</div></footer><script src="main.js?v=2.1"></script>
-<script>
-(function(){
-  function num(id){ return parseFloat(document.getElementById(id)?.value); }
-  function set(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
-  document.addEventListener('DOMContentLoaded', function(){
-    const bmiBtn=document.getElementById('bmiCalculate');
-    const bmrBtn=document.getElementById('bmrCalculate');
-    const calBtn=document.getElementById('calCalculate');
-    const hrBtn=document.getElementById('hrCalculate');
-    if(bmiBtn) bmiBtn.addEventListener('click', function(){
-      const w=num('weight'), h=num('height');
-      if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0){set('bmiResult','Please enter a valid weight and height.');return;}
-      const bmi=w/Math.pow(h/100,2);
-      const c=bmi<18.5?'Below the usual adult BMI range':bmi<25?'Within the usual adult BMI range':bmi<30?'Above the usual adult BMI range':'In the obesity BMI range';
-      set('bmiResult',`BMI: <strong>${bmi.toFixed(1)}</strong> — ${c}. BMI is a screening measure, not a diagnosis.`);
-    });
-    if(bmrBtn) bmrBtn.addEventListener('click', function(){
-      const w=num('bmrWeight'), h=num('bmrHeight'), a=num('bmrAge'), sex=document.getElementById('bmrSex')?.value;
-      if(!Number.isFinite(w)||!Number.isFinite(h)||!Number.isFinite(a)||w<=0||h<=0||a<=0){set('bmrResult','Please enter valid weight, height and age.');return;}
-      const b=sex==='male'?10*w+6.25*h-5*a+5:10*w+6.25*h-5*a-161;
-      set('bmrResult',`Estimated BMR: <strong>${Math.round(b)} kcal/day</strong>. This is an estimate of resting energy expenditure.`);
-    });
-    if(calBtn) calBtn.addEventListener('click', function(){
-      const b=num('bmrForCal'), act=num('activity');
-      if(!Number.isFinite(b)||!Number.isFinite(act)||b<=0){set('calResult','Please enter a valid estimated BMR.');return;}
-      set('calResult',`Estimated daily energy needs: <strong>${Math.round(b*act)} kcal/day</strong>. Individual needs vary.`);
-    });
-    if(hrBtn) hrBtn.addEventListener('click', function(){
-      const age=num('hrAge');
-      if(!Number.isFinite(age)||age<=0||age>120){set('hrResult','Please enter a valid age.');return;}
-      const max=220-age;
-      set('hrResult',`Estimated maximum heart rate: <strong>${Math.round(max)} bpm</strong>. Moderate: <strong>${Math.round(max*.5)}–${Math.round(max*.7)} bpm</strong>; vigorous: <strong>${Math.round(max*.7)}–${Math.round(max*.85)} bpm</strong>. General estimates only.`);
-    });
-  });
-})();
-</script>
-<section class="v2-section" id="blood-pressure-analyzer">
-<div class="v2-container"><div class="v2-tool">
-<p style="color:#087f8c;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Blood Pressure Analyzer</p>
-<h2>Understand a blood-pressure reading</h2>
-<p>Enter an adult resting blood-pressure reading for a general educational interpretation.</p>
-<div class="v2-form">
-<label>Systolic BP (mmHg)<input id="v2-sys" type="number" min="50" max="300" inputmode="numeric" placeholder="e.g. 128"></label>
-<label>Diastolic BP (mmHg)<input id="v2-dia" type="number" min="30" max="200" inputmode="numeric" placeholder="e.g. 78"></label>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Vitanora Health Tools — educational BMI and blood pressure tools.">
+<title>Vitanora Health Tools</title>
+<style>
+:root{--navy:#102a43;--teal:#087f8c;--bg:#f6fafb;--muted:#526779}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;color:var(--navy);background:var(--bg);line-height:1.6}
+header{background:#fff;border-bottom:1px solid #e4edf1;padding:18px 0}
+nav{width:min(1050px,92%);margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.logo{font-size:25px;font-weight:800;color:var(--teal);text-decoration:none}
+nav a{color:var(--navy);text-decoration:none;font-weight:600}
+main{width:min(950px,92%);margin:35px auto}
+h1{font-size:clamp(30px,6vw,46px);margin-bottom:8px}
+h2{margin-top:0}.intro{color:var(--muted)}
+.tool{background:#fff;border:1px solid #dce8ed;border-radius:20px;padding:25px;margin:25px 0;box-shadow:0 5px 20px rgba(16,42,67,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+label{font-weight:700;display:block}
+input{width:100%;margin-top:7px;padding:13px;border:1px solid #bdccd5;border-radius:10px;font-size:17px}
+button{margin-top:16px;padding:13px 20px;border:0;border-radius:10px;background:var(--teal);color:white;font-weight:700;font-size:16px;cursor:pointer}
+.result{margin-top:17px;padding:15px;background:#f0f8f7;border-left:4px solid var(--teal);border-radius:9px;min-height:48px}
+.note{font-size:13px;color:var(--muted)}
+footer{padding:30px 4%;text-align:center;color:var(--muted);font-size:13px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}main{margin-top:25px}.tool{padding:20px}}
+</style>
+</head>
+<body>
+<header>
+<nav>
+<a class="logo" href="index.html">Vitanora</a>
+<a href="index.html">Home</a>
+</nav>
+</header>
+
+<main>
+<h1>Health Tools</h1>
+<p class="intro">Simple educational tools for everyday health. These tools provide estimates and do not diagnose medical conditions.</p>
+
+<section class="tool">
+<h2>⚖️ BMI Calculator</h2>
+<div class="grid">
+<label>Height (cm)
+<input id="height" type="number" inputmode="decimal" min="50" max="250" placeholder="170">
+</label>
+<label>Weight (kg)
+<input id="weight" type="number" inputmode="decimal" min="10" max="400" placeholder="70">
+</label>
 </div>
-<button class="v2-btn" id="v2-bp-btn" type="button" style="margin-top:14px">Analyze blood pressure</button>
-<div class="v2-result" id="v2-bp-result" aria-live="polite">Enter both numbers to see an interpretation.</div>
-<h3>For a better reading</h3>
-<ul><li>Rest quietly for about 5 minutes before measuring.</li><li>Use a validated upper-arm cuff of the appropriate size.</li><li>Keep the arm supported at heart level and avoid talking during the measurement.</li><li>A single reading does not establish a diagnosis.</li></ul>
-<p class="v2-disclaimer">Educational tool for adults only. Thresholds can differ between guidelines and clinical settings. This is not a diagnosis. If blood pressure is extremely high or is accompanied by chest pain, severe shortness of breath, neurological symptoms, confusion, or fainting, seek urgent medical care.</p>
-</div></div>
+<button type="button" id="bmiBtn">Calculate BMI</button>
+<div class="result" id="bmiResult">Enter your height and weight.</div>
+<p class="note">BMI is a screening measure and has limitations. It should not be used alone to assess an individual's health.</p>
 </section>
 
-</body></html>
+<section class="tool" id="blood-pressure">
+<h2>🩸 Blood Pressure Analyzer</h2>
+<p>Enter an adult resting blood-pressure reading.</p>
+<div class="grid">
+<label>Systolic BP (mmHg)
+<input id="sys" type="number" inputmode="numeric" min="50" max="300" placeholder="128">
+</label>
+<label>Diastolic BP (mmHg)
+<input id="dia" type="number" inputmode="numeric" min="30" max="200" placeholder="78">
+</label>
+</div>
+<button type="button" id="bpBtn">Analyze Blood Pressure</button>
+<div class="result" id="bpResult">Enter systolic and diastolic values.</div>
+
+<h3>For a more reliable measurement</h3>
+<ul>
+<li>Rest quietly for about 5 minutes beforehand.</li>
+<li>Use an appropriately sized upper-arm cuff.</li>
+<li>Keep your arm supported at heart level.</li>
+<li>Avoid talking during the measurement.</li>
+<li>Consider repeated readings rather than relying on one measurement.</li>
+</ul>
+
+<p class="note"><strong>Safety:</strong> A reading of 180/120 mmHg or higher is very high. Repeat it after a short rest. If it remains this high, seek prompt medical advice. If it is accompanied by chest pain, severe shortness of breath, weakness/numbness, difficulty speaking, confusion, fainting or other severe symptoms, seek emergency medical care.</p>
+<p class="note">Educational information for adults. BP thresholds can differ between guidelines and clinical settings. This tool is not a diagnosis and does not replace professional medical assessment.</p>
+</section>
+</main>
+
+<footer>© Vitanora — Health, Fitness, Nutrition & Prevention</footer>
+
+<script>
+document.getElementById("bmiBtn").addEventListener("click", function(){
+  const h = parseFloat(document.getElementById("height").value);
+  const w = parseFloat(document.getElementById("weight").value);
+  const r = document.getElementById("bmiResult");
+
+  if(!Number.isFinite(h) || !Number.isFinite(w) || h < 50 || h > 250 || w < 10 || w > 400){
+    r.textContent = "Please enter a valid height and weight.";
+    return;
+  }
+
+  const bmi = w / Math.pow(h/100, 2);
+  let category = "";
+  if(bmi < 18.5) category = "Below the usual adult BMI range";
+  else if(bmi < 25) category = "Within the usual adult BMI range";
+  else if(bmi < 30) category = "Above the usual adult BMI range";
+  else category = "In the obesity BMI range";
+
+  r.innerHTML = "<strong>BMI: " + bmi.toFixed(1) + "</strong><br>" + category + ".";
+});
+
+document.getElementById("bpBtn").addEventListener("click", function(){
+  const s = parseFloat(document.getElementById("sys").value);
+  const d = parseFloat(document.getElementById("dia").value);
+  const r = document.getElementById("bpResult");
+
+  if(!Number.isFinite(s) || !Number.isFinite(d) || s < 50 || s > 300 || d < 30 || d > 200){
+    r.textContent = "Please enter valid systolic and diastolic values.";
+    return;
+  }
+
+  if(s >= 180 || d >= 120){
+    r.innerHTML = "<strong>Very high blood pressure.</strong><br>Repeat the measurement after a short rest. If it remains this high, seek prompt medical advice. If you have severe or concerning symptoms, seek emergency medical care.";
+    return;
+  }
+
+  let category;
+  if(s >= 140 || d >= 90) category = "High blood pressure — Stage 2 range";
+  else if(s >= 130 || d >= 80) category = "High blood pressure — Stage 1 range";
+  else if(s >= 120 && d < 80) category = "Elevated blood pressure";
+  else category = "Normal blood pressure range";
+
+  r.innerHTML = "<strong>" + category + "</strong><br>Reading: " + Math.round(s) + "/" + Math.round(d) + " mmHg.";
+});
+</script>
+</body>
+</html>
