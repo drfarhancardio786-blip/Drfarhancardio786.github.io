@@ -1,6 +1,3 @@
-# Vitanora — GitHub Mobile Version
+# Vitanora v2.1
 
-All website files are intentionally in the repository root for easy upload from Android.
-
-Publish with GitHub Pages:
-Settings → Pages → Deploy from a branch → main → /(root).
+Vitanora health education website. v2.1 includes a robust self-contained calculator event system and cache-busting for the main JavaScript file.

@@ -1,7 +1,43 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Simple calculators for general educational use."><title>Free calculators | Vitanora</title><link rel="stylesheet" href="style.css"></head><body>
 <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">V</span><span>Vitanora</span></a><button class="menu-toggle" aria-label="Open menu">☰</button><nav class="nav"><a href="index.html">Home</a><a href="health.html">Health</a><a href="heart.html">Heart</a><a href="fitness.html">Fitness</a><a href="nutrition.html">Nutrition</a><a href="tools.html">Tools</a><a href="articles.html">Articles</a><a href="about.html">About</a></nav></header>
-<main><section class="page-hero"><span class="eyebrow">HEALTH TOOLS</span><h1>Free calculators</h1><p>Simple calculators for general educational use.</p></section><section class="page-content"><div class="tool-grid"><div class="tool-box" id="bmi"><span class="eyebrow">BMI</span><h2>Body Mass Index</h2><label>Weight (kg)</label><input id="weight" type="number" step="0.1"><label>Height (cm)</label><input id="height" type="number" step="0.1"><button class="btn primary" style="margin-top:16px" onclick="calcBMI()">Calculate</button><div class="result" id="bmiResult"></div></div>
-<div class="tool-box" id="bmr"><span class="eyebrow">BMR</span><h2>Basal metabolic rate</h2><label>Sex</label><select id="bmrSex"><option value="male">Male</option><option value="female">Female</option></select><label>Weight (kg)</label><input id="bmrWeight" type="number"><label>Height (cm)</label><input id="bmrHeight" type="number"><label>Age</label><input id="bmrAge" type="number"><button class="btn primary" style="margin-top:16px" onclick="calcBMR()">Calculate</button><div class="result" id="bmrResult"></div></div>
-<div class="tool-box" id="calories"><span class="eyebrow">ENERGY</span><h2>Daily calorie estimate</h2><label>Estimated BMR (kcal/day)</label><input id="bmrForCal" type="number"><label>Activity factor</label><select id="activity"><option value="1.2">Sedentary · 1.2</option><option value="1.375">Lightly active · 1.375</option><option value="1.55">Moderately active · 1.55</option><option value="1.725">Very active · 1.725</option></select><button class="btn primary" style="margin-top:16px" onclick="calcCalories()">Calculate</button><div class="result" id="calResult"></div></div>
-<div class="tool-box" id="heart-rate"><span class="eyebrow">FITNESS</span><h2>Target heart rate</h2><label>Age</label><input id="hrAge" type="number"><button class="btn primary" style="margin-top:16px" onclick="calcHR()">Calculate</button><div class="result" id="hrResult"></div></div></div><div class="notice" style="margin-top:25px">These calculators provide general estimates. BMI has important limitations, calorie formulas are estimates, and heart-rate targets may not be appropriate for everyone—especially people with cardiovascular disease or those taking medicines that affect heart rate.</div></section></main>
-<footer><div><a class="brand" href="index.html"><span class="brand-mark">V</span><span>Vitanora</span></a><p>Evidence-based health. Better fitness. Healthier living.</p></div><div class="footer-links"><a href="health.html">Health</a><a href="fitness.html">Fitness</a><a href="nutrition.html">Nutrition</a><a href="tools.html">Tools</a><a href="about.html">About</a></div><div class="disclaimer"><strong>Medical disclaimer</strong><br>Vitanora provides general educational information and is not a substitute for individualized medical advice, diagnosis or treatment.</div></footer><script src="main.js"></script></body></html>
+<main><section class="page-hero"><span class="eyebrow">HEALTH TOOLS</span><h1>Free calculators</h1><p>Simple calculators for general educational use.</p></section><section class="page-content"><div class="tool-grid"><div class="tool-box" id="bmi"><span class="eyebrow">BMI</span><h2>Body Mass Index</h2><label>Weight (kg)</label><input id="weight" type="number" step="0.1"><label>Height (cm)</label><input id="height" type="number" step="0.1"><button class="btn primary" style="margin-top:16px" id="bmiCalculate">Calculate</button><div class="result" id="bmiResult"></div></div>
+<div class="tool-box" id="bmr"><span class="eyebrow">BMR</span><h2>Basal metabolic rate</h2><label>Sex</label><select id="bmrSex"><option value="male">Male</option><option value="female">Female</option></select><label>Weight (kg)</label><input id="bmrWeight" type="number"><label>Height (cm)</label><input id="bmrHeight" type="number"><label>Age</label><input id="bmrAge" type="number"><button class="btn primary" style="margin-top:16px" id="bmrCalculate">Calculate</button><div class="result" id="bmrResult"></div></div>
+<div class="tool-box" id="calories"><span class="eyebrow">ENERGY</span><h2>Daily calorie estimate</h2><label>Estimated BMR (kcal/day)</label><input id="bmrForCal" type="number"><label>Activity factor</label><select id="activity"><option value="1.2">Sedentary · 1.2</option><option value="1.375">Lightly active · 1.375</option><option value="1.55">Moderately active · 1.55</option><option value="1.725">Very active · 1.725</option></select><button class="btn primary" style="margin-top:16px" id="calCalculate">Calculate</button><div class="result" id="calResult"></div></div>
+<div class="tool-box" id="heart-rate"><span class="eyebrow">FITNESS</span><h2>Target heart rate</h2><label>Age</label><input id="hrAge" type="number"><button class="btn primary" style="margin-top:16px" id="hrCalculate">Calculate</button><div class="result" id="hrResult"></div></div></div><div class="notice" style="margin-top:25px">These calculators provide general estimates. BMI has important limitations, calorie formulas are estimates, and heart-rate targets may not be appropriate for everyone—especially people with cardiovascular disease or those taking medicines that affect heart rate.</div></section></main>
+<footer><div><a class="brand" href="index.html"><span class="brand-mark">V</span><span>Vitanora</span></a><p>Evidence-based health. Better fitness. Healthier living.</p></div><div class="footer-links"><a href="health.html">Health</a><a href="fitness.html">Fitness</a><a href="nutrition.html">Nutrition</a><a href="tools.html">Tools</a><a href="about.html">About</a></div><div class="disclaimer"><strong>Medical disclaimer</strong><br>Vitanora provides general educational information and is not a substitute for individualized medical advice, diagnosis or treatment.</div></footer><script src="main.js?v=2.1"></script>
+<script>
+(function(){
+  function num(id){ return parseFloat(document.getElementById(id)?.value); }
+  function set(id, html){ const el=document.getElementById(id); if(el) el.innerHTML=html; }
+  document.addEventListener('DOMContentLoaded', function(){
+    const bmiBtn=document.getElementById('bmiCalculate');
+    const bmrBtn=document.getElementById('bmrCalculate');
+    const calBtn=document.getElementById('calCalculate');
+    const hrBtn=document.getElementById('hrCalculate');
+    if(bmiBtn) bmiBtn.addEventListener('click', function(){
+      const w=num('weight'), h=num('height');
+      if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0){set('bmiResult','Please enter a valid weight and height.');return;}
+      const bmi=w/Math.pow(h/100,2);
+      const c=bmi<18.5?'Below the usual adult BMI range':bmi<25?'Within the usual adult BMI range':bmi<30?'Above the usual adult BMI range':'In the obesity BMI range';
+      set('bmiResult',`BMI: <strong>${bmi.toFixed(1)}</strong> — ${c}. BMI is a screening measure, not a diagnosis.`);
+    });
+    if(bmrBtn) bmrBtn.addEventListener('click', function(){
+      const w=num('bmrWeight'), h=num('bmrHeight'), a=num('bmrAge'), sex=document.getElementById('bmrSex')?.value;
+      if(!Number.isFinite(w)||!Number.isFinite(h)||!Number.isFinite(a)||w<=0||h<=0||a<=0){set('bmrResult','Please enter valid weight, height and age.');return;}
+      const b=sex==='male'?10*w+6.25*h-5*a+5:10*w+6.25*h-5*a-161;
+      set('bmrResult',`Estimated BMR: <strong>${Math.round(b)} kcal/day</strong>. This is an estimate of resting energy expenditure.`);
+    });
+    if(calBtn) calBtn.addEventListener('click', function(){
+      const b=num('bmrForCal'), act=num('activity');
+      if(!Number.isFinite(b)||!Number.isFinite(act)||b<=0){set('calResult','Please enter a valid estimated BMR.');return;}
+      set('calResult',`Estimated daily energy needs: <strong>${Math.round(b*act)} kcal/day</strong>. Individual needs vary.`);
+    });
+    if(hrBtn) hrBtn.addEventListener('click', function(){
+      const age=num('hrAge');
+      if(!Number.isFinite(age)||age<=0||age>120){set('hrResult','Please enter a valid age.');return;}
+      const max=220-age;
+      set('hrResult',`Estimated maximum heart rate: <strong>${Math.round(max)} bpm</strong>. Moderate: <strong>${Math.round(max*.5)}–${Math.round(max*.7)} bpm</strong>; vigorous: <strong>${Math.round(max*.7)}–${Math.round(max*.85)} bpm</strong>. General estimates only.`);
+    });
+  });
+})();
+</script></body></html>
