@@ -18,12 +18,16 @@ jobs:
         run: |
           import html.parser
           import pathlib
-          import re
           import sys
           from urllib.parse import urlsplit
 
           root = pathlib.Path('.')
-          html_files = sorted(root.glob('*.html'))
+          # Google Search Console verification files are intentionally bare
+          # token files, not normal HTML documents, so exclude them here.
+          html_files = sorted(
+              p for p in root.glob('*.html')
+              if not p.name.startswith('google')
+          )
           errors = []
 
           if not html_files:
@@ -80,12 +84,14 @@ jobs:
               sys.exit(1)
 
           print(f'Validated {len(html_files)} HTML files successfully.')
+
       - name: Verify sitemap is present and non-empty
         shell: bash
         run: |
           test -s sitemap.xml
           grep -q '<urlset' sitemap.xml
           echo 'sitemap.xml looks valid.'
+
       - name: Verify robots.txt references sitemap
         shell: bash
         run: |
