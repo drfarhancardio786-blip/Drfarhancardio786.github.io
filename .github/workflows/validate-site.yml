@@ -1,0 +1,93 @@
+name: Validate Vitanora site
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate HTML structure and internal links
+        shell: python
+        run: |
+          import html.parser
+          import pathlib
+          import re
+          import sys
+          from urllib.parse import urlsplit
+
+          root = pathlib.Path('.')
+          html_files = sorted(root.glob('*.html'))
+          errors = []
+
+          if not html_files:
+              errors.append('No HTML files found.')
+
+          class Parser(html.parser.HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.tags = []
+                  self.links = []
+                  self.doctype = False
+              def handle_decl(self, decl):
+                  if decl.lower().startswith('doctype html'):
+                      self.doctype = True
+              def handle_starttag(self, tag, attrs):
+                  self.tags.append(tag.lower())
+                  for key, value in attrs:
+                      if key.lower() == 'href' and value:
+                          self.links.append(value)
+
+          for path in html_files:
+              parser = Parser()
+              try:
+                  parser.feed(path.read_text(encoding='utf-8'))
+              except Exception as exc:
+                  errors.append(f'{path}: HTML parsing failed: {exc}')
+                  continue
+
+              if not parser.doctype:
+                  errors.append(f'{path}: missing <!doctype html>')
+              if 'html' not in parser.tags:
+                  errors.append(f'{path}: missing <html> element')
+              if 'title' not in parser.tags:
+                  errors.append(f'{path}: missing <title> element')
+
+              for href in parser.links:
+                  if href.startswith(('#', 'mailto:', 'tel:', 'javascript:')):
+                      continue
+                  parsed = urlsplit(href)
+                  if parsed.scheme or parsed.netloc:
+                      continue
+                  target = (path.parent / parsed.path).resolve()
+                  if parsed.path == '':
+                      target = path.resolve()
+                  if not target.exists():
+                      errors.append(f'{path}: broken internal link -> {href}')
+
+          for required in ('robots.txt', 'sitemap.xml'):
+              if not (root / required).exists():
+                  errors.append(f'Missing required file: {required}')
+
+          if errors:
+              print('\n'.join(errors))
+              sys.exit(1)
+
+          print(f'Validated {len(html_files)} HTML files successfully.')
+      - name: Verify sitemap is present and non-empty
+        shell: bash
+        run: |
+          test -s sitemap.xml
+          grep -q '<urlset' sitemap.xml
+          echo 'sitemap.xml looks valid.'
+      - name: Verify robots.txt references sitemap
+        shell: bash
+        run: |
+          grep -qi '^Sitemap:' robots.txt
+          echo 'robots.txt contains a Sitemap directive.'
