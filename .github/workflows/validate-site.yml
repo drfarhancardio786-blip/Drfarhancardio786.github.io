@@ -13,17 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate HTML structure and internal links
+      - name: Validate site structure, metadata and internal links
         shell: python
         run: |
           import html.parser
+          import json
           import pathlib
           import sys
-          from urllib.parse import urlsplit
+          import xml.etree.ElementTree as ET
+          from urllib.parse import urlsplit, unquote
 
-          root = pathlib.Path('.')
-          # Google Search Console verification files are intentionally bare
-          # token files, not normal HTML documents, so exclude them here.
+          root = pathlib.Path('.').resolve()
+          site_base = 'https://drfarhancardio786-blip.github.io/Drfarhancardio786.github.io/'
           html_files = sorted(
               p for p in root.glob('*.html')
               if not p.name.startswith('google')
@@ -38,52 +39,151 @@ jobs:
                   super().__init__()
                   self.tags = []
                   self.links = []
+                  self.meta = {}
+                  self.canonicals = []
+                  self.json_ld = []
                   self.doctype = False
+                  self._in_json_ld = False
+                  self._json_buffer = []
+
               def handle_decl(self, decl):
                   if decl.lower().startswith('doctype html'):
                       self.doctype = True
+
               def handle_starttag(self, tag, attrs):
-                  self.tags.append(tag.lower())
-                  for key, value in attrs:
-                      if key.lower() == 'href' and value:
+                  tag = tag.lower()
+                  self.tags.append(tag)
+                  data = {key.lower(): value for key, value in attrs if value is not None}
+                  for key in ('href', 'src'):
+                      value = data.get(key)
+                      if value:
                           self.links.append(value)
+                  if tag == 'meta':
+                      key = (data.get('name') or data.get('property') or '').lower()
+                      if key:
+                          self.meta[key] = data.get('content', '')
+                  if tag == 'link' and data.get('rel', '').lower() == 'canonical':
+                      self.canonicals.append(data.get('href', ''))
+                  if tag == 'script' and data.get('type', '').lower() == 'application/ld+json':
+                      self._in_json_ld = True
+                      self._json_buffer = []
+
+              def handle_data(self, data):
+                  if self._in_json_ld:
+                      self._json_buffer.append(data)
+
+              def handle_endtag(self, tag):
+                  if tag.lower() == 'script' and self._in_json_ld:
+                      self.json_ld.append(''.join(self._json_buffer).strip())
+                      self._in_json_ld = False
+                      self._json_buffer = []
+
+          def local_target(path, value):
+              parsed = urlsplit(value)
+              if parsed.scheme or parsed.netloc:
+                  return None
+              if value.startswith(('#', 'mailto:', 'tel:', 'javascript:', 'data:')):
+                  return None
+              relative = unquote(parsed.path)
+              if not relative:
+                  return path.resolve()
+              target = (path.parent / relative).resolve()
+              try:
+                  target.relative_to(root)
+              except ValueError:
+                  return None
+              return target
 
           for path in html_files:
               parser = Parser()
               try:
                   parser.feed(path.read_text(encoding='utf-8'))
+                  parser.close()
               except Exception as exc:
-                  errors.append(f'{path}: HTML parsing failed: {exc}')
+                  errors.append(f'{path.name}: HTML parsing failed: {exc}')
                   continue
 
               if not parser.doctype:
-                  errors.append(f'{path}: missing <!doctype html>')
+                  errors.append(f'{path.name}: missing <!doctype html>')
               if 'html' not in parser.tags:
-                  errors.append(f'{path}: missing <html> element')
+                  errors.append(f'{path.name}: missing <html> element')
               if 'title' not in parser.tags:
-                  errors.append(f'{path}: missing <title> element')
+                  errors.append(f'{path.name}: missing <title> element')
+              if 'description' not in parser.meta or not parser.meta['description'].strip():
+                  errors.append(f'{path.name}: missing meta description')
+              if not parser.canonicals or not parser.canonicals[0].strip():
+                  errors.append(f'{path.name}: missing canonical URL')
+              else:
+                  expected = site_base if path.name == 'index.html' else site_base + path.name
+                  if parser.canonicals[0] != expected:
+                      errors.append(f'{path.name}: canonical URL does not match published URL -> {parser.canonicals[0]}')
 
               for href in parser.links:
-                  if href.startswith(('#', 'mailto:', 'tel:', 'javascript:')):
-                      continue
-                  parsed = urlsplit(href)
-                  if parsed.scheme or parsed.netloc:
-                      continue
-                  target = (path.parent / parsed.path).resolve()
-                  if parsed.path == '':
-                      target = path.resolve()
-                  if not target.exists():
-                      errors.append(f'{path}: broken internal link -> {href}')
+                  target = local_target(path, href)
+                  if target is not None and not target.exists():
+                      errors.append(f'{path.name}: broken local link or asset -> {href}')
 
-          for required in ('robots.txt', 'sitemap.xml'):
-              if not (root / required).exists():
-                  errors.append(f'Missing required file: {required}')
+              if path.name.startswith('article-'):
+                  for required in ('og:title', 'og:description', 'og:url'):
+                      if required not in parser.meta or not parser.meta[required].strip():
+                          errors.append(f'{path.name}: missing {required} metadata')
+                  if not parser.json_ld:
+                      errors.append(f'{path.name}: missing Article structured data')
+                  else:
+                      article_schema_found = False
+                      for block in parser.json_ld:
+                          try:
+                              data = json.loads(block)
+                          except json.JSONDecodeError as exc:
+                              errors.append(f'{path.name}: invalid JSON-LD -> {exc}')
+                              continue
+                          items = data if isinstance(data, list) else [data]
+                          for item in items:
+                              schema_type = item.get('@type') if isinstance(item, dict) else None
+                              types = schema_type if isinstance(schema_type, list) else [schema_type]
+                              if any(t in {'Article', 'MedicalWebPage', 'NewsArticle'} for t in types):
+                                  article_schema_found = True
+                      if not article_schema_found:
+                          errors.append(f'{path.name}: JSON-LD does not declare an article-type schema')
+
+          sitemap_path = root / 'sitemap.xml'
+          robots_path = root / 'robots.txt'
+          for required in (sitemap_path, robots_path):
+              if not required.exists():
+                  errors.append(f'Missing required file: {required.name}')
+
+          if sitemap_path.exists():
+              try:
+                  tree = ET.parse(sitemap_path)
+                  sitemap_root = tree.getroot()
+                  ns = {'sm': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+                  locs = [node.text.strip() for node in sitemap_root.findall('sm:url/sm:loc', ns) if node.text and node.text.strip()]
+                  if not locs:
+                      errors.append('sitemap.xml: no URLs found')
+                  if len(locs) != len(set(locs)):
+                      errors.append('sitemap.xml: duplicate URLs found')
+                  for loc in locs:
+                      if not loc.startswith(site_base):
+                          errors.append(f'sitemap.xml: URL outside site base -> {loc}')
+                          continue
+                      suffix = loc[len(site_base):]
+                      target = root / ('index.html' if suffix in ('', '/') else suffix)
+                      if not target.exists():
+                          errors.append(f'sitemap.xml: URL points to missing file -> {loc}')
+              except ET.ParseError as exc:
+                  errors.append(f'sitemap.xml: invalid XML -> {exc}')
+
+          if robots_path.exists():
+              robots = robots_path.read_text(encoding='utf-8')
+              expected_sitemap = f'Sitemap: {site_base}sitemap.xml'
+              if expected_sitemap not in robots:
+                  errors.append('robots.txt: missing or incorrect Sitemap directive')
 
           if errors:
               print('\n'.join(errors))
               sys.exit(1)
 
-          print(f'Validated {len(html_files)} HTML files successfully.')
+          print(f'Validated {len(html_files)} HTML files, local links/assets, metadata, article schema, sitemap and robots.txt successfully.')
 
       - name: Verify sitemap is present and non-empty
         shell: bash
